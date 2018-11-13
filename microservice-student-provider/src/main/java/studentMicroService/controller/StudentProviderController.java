@@ -1,4 +1,4 @@
-package controller;
+package studentMicroService.controller;
 
 import entity.Student;
 import org.springframework.web.bind.annotation.GetMapping;

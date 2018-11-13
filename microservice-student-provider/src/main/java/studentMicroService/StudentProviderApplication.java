@@ -1,4 +1,4 @@
-package controller;
+package studentMicroService;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -8,9 +8,9 @@ import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 
 @SpringBootApplication(exclude={DataSourceAutoConfiguration.class, HibernateJpaAutoConfiguration.class})
 @EnableEurekaClient
-public class StudentProviderApplication_1001 {
+public class StudentProviderApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(StudentProviderApplication_1001.class, args);
+		SpringApplication.run(StudentProviderApplication.class, args);
 	}
 }
