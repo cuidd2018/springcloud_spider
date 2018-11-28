@@ -12,6 +12,7 @@
         <module>microservice-common</module>
         <module>microservice-eureka-server</module>
         <module>microservice-student-provider</module>
+        <module>microservice-spider</module>
     </modules>
 
     <properties>
@@ -37,7 +38,7 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-            <!-- 数据库连接池 -->
+             <!--数据库连接池-->
             <dependency>
                 <groupId>com.alibaba</groupId>
                 <artifactId>druid</artifactId>
