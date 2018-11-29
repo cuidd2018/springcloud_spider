@@ -106,7 +106,7 @@ public class RedisManager extends AbstractDBManager<String> {
     public void writeFetchSegment(CrawlDatum fetchDatum) throws Exception {
         String taskString = serializeUtil.serializeToString(fetchDatum);
         // LOG.info(fetchDatum.url());
-        redisTemplate.opsForList().rightPush((String) getDataBase().getLinkDB(), taskString);
+        redisTemplate.opsForList().rightPush(getDataBase().getLinkDB(), taskString);
     }
 
     /**

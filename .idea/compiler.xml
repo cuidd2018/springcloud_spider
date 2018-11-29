@@ -8,6 +8,7 @@
         <outputRelativeToContentRoot value="true" />
         <module name="microservice-common" />
         <module name="microservice-eureka-server" />
+        <module name="microservice-mainenter" />
         <module name="microservice-spider" />
         <module name="microservice-student-provider" />
         <module name="microservicecommon" />

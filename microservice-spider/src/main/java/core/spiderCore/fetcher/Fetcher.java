@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -36,24 +36,11 @@ public class Fetcher extends DefaultConfigImp {
     private NextFilter nextFilter = null;
     /**
      * 线程状态属性
-     * activeThreads 活动线程
-     * startedThreads 已启动线程
-     * spinWaiting 等待任务线程
-     * lastRequestStart 请求持续时间
-     */
-    private AtomicInteger activeThreads;
-    private AtomicInteger startedThreads;
-    private AtomicInteger spinWaiting;
-    private AtomicLong lastRequestStart;
-    public static final int FETCH_SUCCESS = 1;
-    public static final int FETCH_FAILED = 2;
-    /**
-     * 线程状态属性
      * threads 线程数量
      * fetcherRuning 调度器状态
      */
     private int threads = 20;
-    private volatile boolean fetcherRuning;
+    private volatile boolean fetcherRunning;
     //private boolean isContentStored = false;
 
     //初始化fetcher
@@ -70,79 +57,40 @@ public class Fetcher extends DefaultConfigImp {
      */
     public Integer fetcherStart() throws Exception {
         if (executor == null) {
-            LOG.info("Please Specify A Executor!");
+            LOG.info("未提供任务执行器");
             return 0;
         }
-        //合并任务库
+        //合并 入口和解析 任务库到 运行任务库
         abstractDbManager.merge();
         try {
             abstractDbManager.initSegmentWriter();
-            LOG.info("init segmentWriter:" + abstractDbManager.getClass().getName());
-
-            fetcherRuning = true;
-            lastRequestStart = new AtomicLong(System.currentTimeMillis());
-            activeThreads = new AtomicInteger(0);
-            startedThreads = new AtomicInteger(0);
-            spinWaiting = new AtomicInteger(0);
+            LOG.info("初始化解析任务存储工具" + abstractDbManager.getClass().getName());
+            fetcherRunning = true;
             //初始化任务管道
             fetchQueue = new FetchQueue();
             //开启从Dbmanager中抽取任务添加到fetchQueue中，generator作任务状态过滤，添加上限1000个
             queueFeeder = new QueueFeeder(this, 1000);
             queueFeeder.start();
 
-            //初始化管道消费者 从queue中读取任务
-            FetcherThread[] fetcherThreads = new FetcherThread[threads];
+            //创建线程池，允许核心线程超时关闭
+            ThreadPoolExecutor threadsExecutor = new ThreadPoolExecutor(30, 45, 2, TimeUnit.SECONDS  , new LinkedBlockingQueue<>(10));
+            threadsExecutor.allowCoreThreadTimeOut(true);
+            //初始化消费者 从queue中读取任务
             for (int i = 0; i < threads; i++) {
-                fetcherThreads[i] = new FetcherThread(this);
-                fetcherThreads[i].start();
+                threadsExecutor.execute(new FetcherThread(this));
             }
-            //主线程循环 每秒打印一次状态；fetcher 的状态，如果为false 则开始停止爬虫
+
             do {
                 pause(1,0 );
-                LOG.info("-activeThreads=" + activeThreads.get()
-                        + ", spinWaiting=" + spinWaiting.get() + ", fetchQueue.size="
-                        + fetchQueue.getSize());
-                if (!queueFeeder.isAlive() && fetchQueue.getSize() < 5) {
-                    fetchQueue.dump();
-                }
-
-                if ((System.currentTimeMillis() - lastRequestStart.get()) > getConfig().getThreadKiller()) {
-                    LOG.info("Aborting with " + activeThreads + " hung threads.");
-                    break;
-                }
-                /*pay addention*/
-                //LOG.info("fetcher 运行状态："+fetcherRuning+"------------------------");
-            } while (fetcherRuning && (startedThreads.get() != threads || activeThreads.get() > 0));
+                LOG.info("【线程池状态：\n"+threadsExecutor.toString()+" 】\n");
+            }while (threadsExecutor.getActiveCount() > 0 && fetcherRunning);
 
             //立即停止任务添加到管道
-            queueFeeder.stopFeeder();
-            //fetcherRuning = false;
-            long waitThreadEndStartTime = System.currentTimeMillis();
-            if (activeThreads.get() > 0) {
-                LOG.info("wait for activeThreads to end");
-            }
-            /*判断活动线程数量 清理所有活动线程*/
-            while (activeThreads.get() > 0) {
-                LOG.info("-activeThreads=" + activeThreads.get());
-                pause(0,500);
-                //如果当前等待时间超过设置的线程停止时间，强制停止所有线程
-                if (System.currentTimeMillis() - waitThreadEndStartTime > getConfig().getWaitThreadEndTime()) {
-                    LOG.info("kill threads");
-                    for (int i = 0; i < fetcherThreads.length; i++) {
-                        if (fetcherThreads[i].isAlive()) {
-                            try {
-                               // fetcherRuning = false;
-                                fetcherThreads[i].stop();
-                                LOG.info("kill thread " + i);
-                            } catch (Exception ex) {
-                                LOG.info("Exception", ex);
-                            }
-                        }
-                    }
-                    break;
-                }
-            }
-            LOG.info("clear all activeThread");
+            LOG.info("本地管道数量："+fetchQueue.getSize());
+            this.stopFetcher();
+            threadsExecutor.shutdown();
+            LOG.info("线程池状态？？---"+threadsExecutor.toString());
+            LOG.info("线程池关闭？？---"+threadsExecutor.isTerminated());
             //停止 任务执行线程后清空管道
             fetchQueue.clearQueue();//清空管道 redis 可以考虑重新将未抓取的url存回redis中
         } finally {
@@ -164,7 +112,7 @@ public class Fetcher extends DefaultConfigImp {
         LOG.info("【----------停止任务生产者----------】");
         queueFeeder.stopFeeder();
         //停止调度器
-        fetcherRuning = false;
+        fetcherRunning = false;
     }
 
 
@@ -180,40 +128,12 @@ public class Fetcher extends DefaultConfigImp {
         return abstractDbManager;
     }
 
-    public void setAbstractDbManager(AbstractDBManager abstractDbManager) {
-        this.abstractDbManager = abstractDbManager;
-    }
-
     public Executor getExecutor() {
         return executor;
     }
 
-    public void setExecutor(Executor executor) {
-        this.executor = executor;
-    }
-
     public NextFilter getNextFilter() {
         return nextFilter;
-    }
-
-    public void setNextFilter(NextFilter nextFilter) {
-        this.nextFilter = nextFilter;
-    }
-
-    public AtomicInteger getActiveThreads() {
-        return activeThreads;
-    }
-
-    public AtomicInteger getStartedThreads() {
-        return startedThreads;
-    }
-
-    public AtomicInteger getSpinWaiting() {
-        return spinWaiting;
-    }
-
-    public AtomicLong getLastRequestStart() {
-        return lastRequestStart;
     }
 
     public void setThreads(int threads) {
@@ -221,7 +141,7 @@ public class Fetcher extends DefaultConfigImp {
     }
 
     public boolean isFetcherRuning() {
-        return fetcherRuning;
+        return fetcherRunning;
     }
 
     /**
@@ -232,7 +152,7 @@ public class Fetcher extends DefaultConfigImp {
             TimeUnit.SECONDS.sleep(second);
             TimeUnit.MILLISECONDS.sleep(mills);
         } catch (InterruptedException e) {
-            LOG.error("Fetcher thread sleep exception");
+            LOG.error("调度器休眠出错");
         }
     }
 }

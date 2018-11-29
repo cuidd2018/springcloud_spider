@@ -11,10 +11,10 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.TimeUnit;
 
 /**
-* @author 一杯咖啡
-* @desc 任务生产者
-* @createTime
-*/
+ * @author 一杯咖啡
+ * @desc 任务生产者
+ * @createTime
+ */
 public class QueueFeeder extends Thread {
 
     private static final Logger LOG = LoggerFactory.getLogger(QueueFeeder.class);
@@ -31,6 +31,7 @@ public class QueueFeeder extends Thread {
 
     /**
      * desc:初始化feeder
+     *
      * @Return:
      **/
     public QueueFeeder(Fetcher fetcher, Integer size) {
@@ -38,25 +39,27 @@ public class QueueFeeder extends Thread {
         this.abstractDbManager = fetcher.getAbstractDbManager();
         this.queueMaxSize = size;
     }
+
     /**
      * desc:关闭管道添加工具
+     *
      * @Return: void
      **/
     public void stopFeeder() {
         //停止数据库提取工具
         try {
-            LOG.info("【-------------关闭数据库提取工具-------------】");
+            LOG.info("【正在关闭数据库提取工具】");
             closeGenerator();
         } catch (Exception e) {
-            LOG.error("stoping abstractGenerator exception");
+            LOG.error("【关闭数据库提取工具出错】");
         }
         FeederRunning = false;
         while (this.isAlive()) {
             try {
                 TimeUnit.SECONDS.sleep(1);
-                LOG.info("【-------------停止任务生产者提取工具-------------】");
+                LOG.info("【停止任务生产者】");
             } catch (InterruptedException ex) {
-                LOG.error("关闭任务生产者线程休眠停止异常");
+                LOG.error("【关闭任务生产者线程-前- 休眠出错】");
             }
         }
     }
@@ -72,8 +75,10 @@ public class QueueFeeder extends Thread {
             LOG.info("close abstractGenerator:" + abstractGenerator.getClass().getName() + " ......");
         }
     }
+
     /**
      * desc: feeder 线程运行
+     *
      * @Return:
      **/
     @Override
@@ -90,21 +95,34 @@ public class QueueFeeder extends Thread {
             int feed = queueMaxSize - queue.getSize();
             if (feed <= 0) {
                 try {
-                    Thread.sleep(1000);
+                    TimeUnit.SECONDS.sleep(1);
                 } catch (InterruptedException ex) {
                 }
                 continue;
             }
-            //如果queue中小于1000，往queue中添加新任务
+            //如果queue中小于1000，往queue中添加新任务，未提取到任务 count 等待时间
+            int count = 0;
             while (feed > 0 && hasMore && FeederRunning) {
                 //任务生成器 如果下一个任务为空，返回空。判断dbmananger中是否有后续任务
                 CrawlDatum datum = abstractGenerator.next();
-                hasMore = (datum != null);
-                if (hasMore) {
+                boolean datumNext = (datum != null);
+                if (datumNext) {
                     fetchItem = new FetchItem();
                     fetchItem.setDatum(datum);
                     queue.addFetchItem(fetchItem);
                     feed--;//一直填到queue为1000
+                } else {
+                    try {
+                        TimeUnit.SECONDS.sleep(1);
+                        count++;
+                        if (count < 10) {
+                            LOG.info("redis 中无后续任务，等待第 "+count+" 秒");
+                        } else {
+                            LOG.info("等待超时，关闭程序");
+                            hasMore = false;
+                        }
+                    } catch (InterruptedException e) {
+                    }
                 }
             }
         }

@@ -47,7 +47,7 @@ public class SpiderEngine {
     private MyParesContent paresContent;
     @Autowired
     private SerializeUtil serializeUtil;
-
+    @Autowired private MySpider mySpider;
     /**
      * desc: 初始化爬虫
      **/
@@ -84,12 +84,10 @@ public class SpiderEngine {
             dataStoreTool.initStore(siteConfig.getTableName());
             paresUtil.initParesUitl(siteConfig, dataStoreTool);
             paresContent.MyParesContent(paresUtil);
-            MySpider mySpider = new MySpider();
-           // ConfigurationUtils.setTo(mySpider, ramDBManager.getAbstractGenerator());
             ConfigurationUtils.setTo(mySpider, paresContent,redisManager);
             mySpider.setAbstractDbManager(redisManager);
             mySpider.initMySpider(siteConfig, paresContent, myRequester, paresUtil);
-            mySpider.getConfig().setTopN(10000);
+            mySpider.getConfig().setTopN(1000);
             LOG.info(this.toString());
 
             //10秒自动关闭爬虫
@@ -97,6 +95,7 @@ public class SpiderEngine {
                 pause(10, 0);
                 mySpider.stop();
             }, "关闭线程").start();*/
+
             mySpider.startFetcher(mySpider);
         } catch (Exception e) {
             LOG.error("初始化爬虫异常: " + e.getCause() + ";messages:" + e.getMessage());

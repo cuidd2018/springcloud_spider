@@ -13,6 +13,7 @@
         <module>microservice-eureka-server</module>
         <module>microservice-student-provider</module>
         <module>microservice-spider</module>
+        <module>microservice-mainenter</module>
     </modules>
 
     <properties>

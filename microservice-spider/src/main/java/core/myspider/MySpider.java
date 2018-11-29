@@ -10,6 +10,7 @@ import core.spiderCore.entities.Page;
 import core.spiderCore.http.IRequestor.Requester;
 import core.spiderCore.pares.ParesContent;
 import org.apache.log4j.Logger;
+import org.springframework.stereotype.Component;
 
 import java.util.concurrent.TimeUnit;
 
@@ -18,6 +19,7 @@ import java.util.concurrent.TimeUnit;
 * @desc 小型分布式爬虫,爬虫初始化组件
 * @createTime  ${YEAR}-${MONTH}-${DAY}-${TIME}
 */
+@Component
 public class MySpider extends AbstractAutoParseCrawler {
 
     private static final Logger LOG = Logger.getLogger(MySpider.class);
@@ -127,34 +129,6 @@ public class MySpider extends AbstractAutoParseCrawler {
     public void afterStop() {
         LOG.info(paresUtil.getParesCounter().toString());
         LOG.info("等待10秒 继续下一任务--------------------------");
-        try {
-            TimeUnit.SECONDS.sleep(10);
-            //LOG.info("又开始抓取拉——————————————————");
-            //this.startFetcher(this);
-            //从mysql 中加载配置到redis中
-           /* mysqlToRedis.MysqlWirteRedis();
-            String objstr;
-            //阻塞直到能取出值
-            while (true) {
-                objstr = (String) redisTemplate.opsForList().leftPop("sites");
-                //objstr = js.lpop("sites");
-                if ("".equals(objstr) || objstr == null) {
-                    LOG.error("redis 列表为空");
-                    Thread.sleep(5000);
-                } else {
-                    break;
-                }
-            }*/
-            // Object o = serializeUtil.deserializeToObject(objstr);
-            //  SiteConfig sc = (SiteConfig) o;
-            // LOG.info(sc.getSiteName() + " 装载中+++++");
-            //MySpider mySpider = new MySpider();
-            //  mySpider.init(sc);
-            //this.StartFetcher(this);
-            //mySpider.StartFetcher(mySpider);
-        } catch (Exception e) {
-            LOG.error("再启动爬虫失败");
-        }
+            System.exit(0);
     }
-
 }
