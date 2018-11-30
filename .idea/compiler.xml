@@ -6,16 +6,20 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="microservice-bloomfilter-request" />
         <module name="microservice-common" />
         <module name="microservice-eureka-server" />
         <module name="microservice-mainenter" />
+        <module name="microservice-parser" />
         <module name="microservice-spider" />
-        <module name="microservice-student-provider" />
         <module name="microservicecommon" />
         <module name="microserviceeurekaserver" />
         <module name="microservicestudentprovider" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel target="1.8" />
+    <bytecodeTargetLevel target="1.8">
+      <module name="microservice-bloomfilter-response" target="1.8" />
+      <module name="microservice-student-provider" target="1.8" />
+    </bytecodeTargetLevel>
   </component>
 </project>

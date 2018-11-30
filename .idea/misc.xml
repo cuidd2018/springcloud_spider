@@ -16,6 +16,8 @@
     </option>
     <option name="ignoredFiles">
       <set>
+        <option value="$PROJECT_DIR$/microservice-bloomfilter-response/pom.xml" />
+        <option value="$PROJECT_DIR$/microservice-student-provider/pom.xml" />
         <option value="$PROJECT_DIR$/spider/pom.xml" />
       </set>
     </option>
