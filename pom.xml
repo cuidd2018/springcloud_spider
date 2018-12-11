@@ -11,11 +11,9 @@
     <modules>
         <module>microservice-common</module>
         <module>microservice-eureka-server</module>
-        <module>microservice-student-provider</module>
         <module>microservice-spider</module>
         <module>microservice-mainenter</module>
         <module>microservice-bloomfilter-request</module>
-        <module>microservice-bloomfilter-response</module>
         <module>microservice-parser</module>
     </modules>
 
