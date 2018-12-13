@@ -11,10 +11,6 @@
 
     <artifactId>microservice-mainenter</artifactId>
      <dependencies>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-activemq</artifactId>
-        </dependency>
          <!--数据库连接-->
          <dependency>
              <groupId>com.alibaba</groupId>
@@ -33,23 +29,13 @@
              <groupId>org.springframework.boot</groupId>
              <artifactId>spring-boot-starter-jdbc</artifactId>
          </dependency>
-         <!--日志配置log4j-->
          <dependency>
-             <groupId>org.springframework.boot</groupId>
-             <artifactId>spring-boot-starter</artifactId>
-             <exclusions>
-                 <exclusion>
-                     <!--排除spring boot 自带的logging-->
-                     <groupId>org.springframework.boot</groupId>
-                     <artifactId>spring-boot-starter-logging</artifactId>
-                 </exclusion>
-             </exclusions>
+             <groupId>org.springframework.cloud</groupId>
+             <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
          </dependency>
-         <!--引入log4j-->
          <dependency>
              <groupId>org.springframework.boot</groupId>
-             <artifactId>spring-boot-starter-log4j</artifactId>
-             <version>1.3.8.RELEASE</version>
+             <artifactId>spring-boot-starter-amqp</artifactId>
          </dependency>
          <dependency>
              <groupId>springcloud</groupId>
@@ -58,4 +44,26 @@
              <scope>compile</scope>
          </dependency>
      </dependencies>
+
+    <!--被打包项目必须配置项-->
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration><!-- 指定该Main Class为全局的唯一入口 -->
+                    <classifier>exec</classifier>
+                    <mainClass>zuulcore.ZuulApp</mainClass>
+                    <layout>JAR</layout>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal><!--可以把依赖的包都打包到生成的Jar包中-->
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>

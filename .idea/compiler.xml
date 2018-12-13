@@ -8,10 +8,13 @@
         <outputRelativeToContentRoot value="true" />
         <module name="microservice-bloomfilter-request" />
         <module name="microservice-common" />
+        <module name="microservice-config-server" />
         <module name="microservice-eureka-server" />
+        <module name="microservice-hystrix-dashboard" />
         <module name="microservice-mainenter" />
         <module name="microservice-parser" />
         <module name="microservice-spider" />
+        <module name="microservice-zuul-api" />
         <module name="microservicecommon" />
         <module name="microserviceeurekaserver" />
         <module name="microservicestudentprovider" />

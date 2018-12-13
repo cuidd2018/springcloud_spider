@@ -9,8 +9,22 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>microservice-parser</artifactId>
-
+    <artifactId>microservice-hystrix-dashboard</artifactId>
+    <dependencies>
+        <!-- https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-commoncore.entity.hystrix -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-hystrix</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-hystrix-dashboard</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+        </dependency>
+    </dependencies>
     <!--被打包项目必须配置项-->
     <build>
         <plugins>
@@ -18,9 +32,9 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration><!-- 指定该Main Class为全局的唯一入口 -->
-                    <classifier>exec</classifier>
-                    <mainClass>zuulcore.ZuulApp</mainClass>
-                    <layout>JAR</layout>
+                    <classifier>exec</classifier><!--配置为执行-->
+                    <mainClass>hystrixdashboardcore.HystrixDashboardApp</mainClass>
+                    <layout>ZIP</layout>
                 </configuration>
                 <executions>
                     <execution>
@@ -32,5 +46,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>

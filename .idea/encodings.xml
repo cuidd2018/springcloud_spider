@@ -3,13 +3,14 @@
   <component name="Encoding" native2AsciiForPropertiesFiles="true" defaultCharsetForPropertiesFiles="UTF-8">
     <file url="file://$PROJECT_DIR$" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/microservice-bloomfilter-request" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/microservice-bloomfilter-response" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/microservice-common" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/microservice-config-server" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/microservice-eureka-server" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/microservice-hystrix-dashboard" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/microservice-mainenter" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/microservice-parser" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/microservice-spider" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/microservice-student-provider" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/microservice-zuul-api" charset="UTF-8" />
     <file url="PROJECT" charset="UTF-8" />
   </component>
 </project>
